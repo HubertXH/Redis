@@ -23,6 +23,7 @@ blpop list0 list1 list2
 若source和destination相同的话可以很好的逐渐循环该列表。
 #### 例子：
 brpoplpush list1 list2 20;
+# 非阻塞队列
 ## LINDEX 
 返回key列表中index下标的元素，时间复杂度为O(N)
 下标的起始值为0;
@@ -51,9 +52,13 @@ lset list index value 将队列list下标为index的元素设置为value
 ## LTRIM
 ltrim list start stop 截取列表 从start开始到stop结束
 ## RPOP
+从队列尾部取值
 ## RPUSH
+向队列尾部插入值
 ## RPUSHX
+向队列尾部插入值，若队列为空则什么都不做
 ## RPOPLPUSH
+非阻塞队列，参见BRPOPLPUSH
 
 
 
