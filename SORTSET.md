@@ -1,5 +1,5 @@
 ## ZADD
-ZADD key [NX|XX] [CH] [INCR] score member [score member ...]
+ZADD key \[NX|XX\] \[CH\] \[INCR\] score member \[score member ...\]
 * 将指定的元素添加到有序集合中，添加的元素为score/member 分值对，score为String 类型双精度浮点数，用于member排序比较。使用score进行升序排序
 * 若集合中member已经存在则更新其score，并将member重新插入到合适的位置。
 * 若集合不存在则创建新的有序集合
@@ -28,7 +28,7 @@ ZINCRBY key increment member
 * 若集合不存在则创建新集合
 * 返回member的新的score
 ## ZINTERSTORE
-ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]
+ZINTERSTORE destination numkeys key \[key ...\] \[WEIGHTS weight \[weight ...\]\] \[AGGREGATE SUM|MIN|MAX\]
 计算给定数量（numkeys）集合（key\[key ...\]）的交集,并将结果存储与destination集合中，numkeys必须在key集合给定之前给予
 默认情况下，交集中每个元素的score为有个key集合中该元素的总和。若过destination已经存在则覆盖。
 关于WEIGHTS和AGGREGATE参数请参考ZUNIONSTORE
@@ -40,9 +40,9 @@ ZLEXCOUNT key min max
 可以使用 - 和 + 表示得分最小值和最大值 
 #### 事例： myzset = 0-a 0-b 0-c 0-d 0-e
 zlexcount myzset - + = 5
-zlexcount myzset [b [d = 3
+zlexcount myzset \[b \[d = 3
 ## ZRANGE
-ZRANGE key start stop [WITHSCORES]
+ZRANGE key start stop \[WITHSCORES\]
 返回下标start stop之内的集合元素，默认的为升序排序，若想使用降序排序请使用ZREVRABGE
 下标的起始值为0;若使用负数则表示从尾部开始，-1代表最后一位
 如果起始值大于终止值则返回一个空列表，如果stop大于集合的大小则，Redis会认为是取最大值
