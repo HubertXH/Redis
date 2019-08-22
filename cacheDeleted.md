@@ -19,3 +19,50 @@ redis使用定期删除+惰性删除来实现键的过期策略。
 在定期删除的时候，会在规定给的时间内，分多次遍历各个数据库，从数据库的过期字典表中随机检查一部分键的过期时间。每次执行的时候，
 redis会有个一全局变量current_db来记录当前activie_ExpireCycle函数检查的进度，并且在下次进行检查的时候接着上次的进度进行处理。
 当所有的服务器都变检查过一遍，则current_db就会重置为0，然后开始新一轮的检查。
+
+#### 数据淘汰策略
+- volatile-lru：(last recently used)从已经设置过期的数据集中挑选最近使用最少的数据进行淘汰。
+- volatile-lfu：(last frequently used)从已经设置过期的数据集中，挑选使用频率最少的数据进行淘汰。
+- volatile-ttl：从已经设置过期的数据集中挑选即将过期的数据进行淘汰。
+- volatile-random：从已经设置过期的数据集中，随机挑选数据进行淘汰。
+- allkeys-lru：从所有的数据集中挑选最近使用最少的数据进行淘汰。
+- allkeys-random：从所有的数据集中随机挑选数据进行淘汰。
+- no-enviction:禁止驱逐策略。
+
+
+###### redisObject中都有24位的bits空间用来记录LRU/LFU的信息。
+##### volatile-lru的实现：
+在LRU中，redisObject的24位bits记录的时一个24位的时钟数。
+在redis内部对对象的访问有个时钟来记录，每次访问一次就会将其更新,在进行lru的时候redis首先拿到全部时钟的时间，然后和当前键的时钟值进行对比，淘汰掉差距最大的键。
+使用linkedHashMap来实现：
+```
+public class LRUCache<K, V> extends LinkedHashMap<K, V> {
+
+    private final int MAX_CACHE_SIZE;
+
+    public LRUCache(int maxCacheSize) {
+        super((int) Math.ceil(maxCacheSize / 0.75) + 1, 0.75f, true);
+        this.MAX_CACHE_SIZE = maxCacheSize;
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+        return size() > MAX_CACHE_SIZE;
+    }
+    
+}
+```
+#### volatile-lfu的实现：
+在LFU中24位bits分为两部分：
+1、前16位记录键的访问时间。。
+2、后8位记录键的访问次数(counter)。
+counter中，可以随着访问次数的增加逐渐的增加，但其一直趋向于255。若在一段的时间内没有被访问到，则counter会衰减。    
+其增加因子和衰减因子：
+- lfu-log-factor:10 增长因子，默认值位10
+- lfu-decay-time:1  衰减因子，默认值位1。
+
+#### 如何发现热点数据：
+redis 提供了命令 object freq 来获取热点数据，但时首先由注意将驱逐策略设置位 allkeys-lfu/volatile-lfu,只有在该策略下才生效。
+使用scan命令遍历键，然后时用object freq 获取访问频率的排序    
+在新版的redisClient中提供了  redis-cli --hotkeys就可以列出热点数据。
+
