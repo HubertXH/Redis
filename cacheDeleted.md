@@ -28,8 +28,6 @@ redis会有个一全局变量current_db来记录当前activie_ExpireCycle函数�
 - allkeys-lru：从所有的数据集中挑选最近使用最少的数据进行淘汰。
 - allkeys-random：从所有的数据集中随机挑选数据进行淘汰。
 - no-enviction:禁止驱逐策略。
-
-
 ###### redisObject中都有24位的bits空间用来记录LRU/LFU的信息。
 ##### volatile-lru的实现：
 在LRU中，redisObject的24位bits记录的时一个24位的时钟数。
